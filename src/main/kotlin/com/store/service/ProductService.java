@@ -14,18 +14,24 @@ public class ProductService {
     public ProductService() {
     }
 
-    public ProductId createProduct(ProductDetails productDetails) {
+    public ProductId createProduct(ProductDetails productDetails)throws InvalidProductTypeException {
         int id = ++initialId;
 
         Product newProduct = new Product();
         ProductId newProductId = new ProductId(id);
-        newProduct.setId(newProductId.getId());
-        newProduct.setName(productDetails.getName());
-        newProduct.setType(productDetails.getType());
-        newProduct.setInventory(productDetails.getInventory());
 
-        products.put(id, newProduct);
-        return newProductId;
+        if (productDetails.getName() == null || productDetails.getType() == null || productDetails.getInventory() <= 0) {
+            throw new InvalidProductTypeException("invalid product");
+        }else{
+            newProduct.setId(newProductId.getId());
+            newProduct.setName(productDetails.getName());
+            newProduct.setType(productDetails.getType());
+            newProduct.setInventory(productDetails.getInventory());
+
+            products.put(id, newProduct);
+            return newProductId;
+        }
+
     }
 
     public List<Product> getProducts(String type) throws InvalidProductTypeException{

@@ -27,13 +27,22 @@ public class ProductsController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductId> createProduct( @RequestBody @Valid ProductDetails productDetails){
-        ProductId newProductId = productService.createProduct(productDetails);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(newProductId)
-                .toUri();
-        return ResponseEntity.created(location).body(newProductId);
+    public ResponseEntity<?> createProduct( @RequestBody @Valid ProductDetails productDetails){
+        try{
+            ProductId newProductId = productService.createProduct(productDetails);
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(newProductId)
+                    .toUri();
+            return ResponseEntity.created(location).body(newProductId);
+        }catch (InvalidProductTypeException e){
+            ErrorResponseBody errorResponse = new ErrorResponseBody();
+            errorResponse.setError(e.getMessage());
+            errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+            errorResponse.setTimestamp(String.valueOf(LocalDateTime.now()));
+            errorResponse.setPath(ServletUriComponentsBuilder.fromCurrentServletMapping().toUriString());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
     @GetMapping
@@ -47,7 +56,6 @@ public class ProductsController {
             errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
             errorResponse.setTimestamp(String.valueOf(LocalDateTime.now()));
             errorResponse.setPath(ServletUriComponentsBuilder.fromCurrentServletMapping().toUriString());
-
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
         return ResponseEntity.ok(products);
