@@ -1,21 +1,10 @@
 package com.store.model;
 
-public class Product {
+import jakarta.validation.constraints.NotNull;
+
+public class Product extends ProductDetails {
 
     private int id;
-    private String name;
-    private ProductType type;
-    private int inventory;
-
-    public Product() {
-    }
-
-    public Product(int id, String name, ProductType type, int inventory) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.inventory = inventory;
-    }
 
     public int getId() {
         return id;
@@ -25,27 +14,12 @@ public class Product {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public Product() {
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public Product(@NotNull String name, @NotNull ProductType type, @NotNull int inventory, @NotNull Double cost, int id) {
+        super(name, type, inventory, cost);
+        this.id = id;
     }
 
-    public ProductType getType() {
-        return type;
-    }
-
-    public void setType(ProductType type) {
-        this.type = type;
-    }
-
-    public int getInventory() {
-        return inventory;
-    }
-
-    public void setInventory(int inventory) {
-        this.inventory = inventory;
-    }
 }

@@ -1,57 +1,55 @@
 package com.store.service;
 
-import com.store.exceptions.InvalidProductTypeException;
+import com.store.exception.InvalidProductFieldException;
 import com.store.model.Product;
 import com.store.model.ProductDetails;
 import com.store.model.ProductId;
 import com.store.model.ProductType;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+@Service
 public class ProductService {
     private static final Map<Integer, Product> products = new HashMap<>();
     private int initialId = 0;
-    public ProductService() {
-    }
 
-    public ProductId createProduct(ProductDetails productDetails)throws InvalidProductTypeException {
+    public ProductId createProduct(ProductDetails productDetails) throws InvalidProductFieldException {
         int id = ++initialId;
 
-        Product newProduct = new Product();
+        Product newProduct;
         ProductId newProductId = new ProductId(id);
 
         if (productDetails.getName() == null || productDetails.getType() == null || productDetails.getInventory() <= 0) {
-            throw new InvalidProductTypeException("invalid product");
-        }else{
-            newProduct.setId(newProductId.getId());
-            newProduct.setName(productDetails.getName());
-            newProduct.setType(productDetails.getType());
-            newProduct.setInventory(productDetails.getInventory());
-
-            products.put(id, newProduct);
-            return newProductId;
+            throw new InvalidProductFieldException("Invalid product field");
+        } else {
+            newProduct = new Product(productDetails.getName(), productDetails.getType(), productDetails.getInventory(), productDetails.getCost(), newProductId.getId());
         }
-
+        products.put(id, newProduct);
+        return newProductId;
     }
 
-    public List<Product> getProducts(String type) throws InvalidProductTypeException{
-        if(type == null) {
-            return new ArrayList<>(products.values());
-        }
-        else if (!type.matches("^(?!true$|false$|\\d+$)[a-zA-Z]+$")){
-            throw new InvalidProductTypeException("Invalid query param");
-        }
-        else {
-            ProductType productType = ProductType.valueOf(type.toLowerCase());
-
-            List<Product> filteredProducts = new ArrayList<>();
-                for (Product product : products.values()) {
-                    if (product.getType().equals(productType)) {
-                        filteredProducts.add(product);
-                    }
+    public List<Product> getProducts(String type) throws InvalidProductFieldException {
+        List<Product> filteredProducts = new ArrayList<>();
+        if (type == null) {
+            for (Product product : products.values()) {
+                if (product.getCost() != null) {
+                    filteredProducts.add(product);
                 }
-
-            return filteredProducts;
+            }
+        } else if (!type.matches("^(?!true$|false$|\\d+$)[a-zA-Z]+$")) {
+            throw new InvalidProductFieldException("Invalid query param");
+        } else {
+            ProductType productType = ProductType.valueOf(type.toLowerCase());
+            for (Product product : products.values()) {
+                if (product.getType().equals(productType) && product.getCost() != null) {
+                    filteredProducts.add(product);
+                }
+            }
         }
+        return filteredProducts;
     }
 }

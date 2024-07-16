@@ -1,4 +1,4 @@
-package com.store.exceptions;
+package com.store.exception;
 
 import com.store.model.ErrorResponseBody;
 import org.springframework.http.HttpStatus;
@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class ExceptionControllerAdvice {
 
-    @ExceptionHandler(InvalidProductTypeException.class)
-    public ResponseEntity<ErrorResponseBody> exceptionHandler(InvalidProductTypeException e) {
+    @ExceptionHandler(InvalidProductFieldException.class)
+    public ResponseEntity<ErrorResponseBody> exceptionHandler(InvalidProductFieldException e) {
         ErrorResponseBody errorResponse = new ErrorResponseBody();
         errorResponse.setError(e.getMessage());
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
