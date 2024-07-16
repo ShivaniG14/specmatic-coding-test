@@ -7,6 +7,7 @@ import com.store.model.ProductId;
 import com.store.model.ProductType;
 import org.springframework.stereotype.Service;
 
+import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,13 +21,13 @@ public class ProductService {
     public ProductId createProduct(ProductDetails productDetails) throws InvalidProductFieldException {
         int id = ++initialId;
 
-        Product newProduct;
+        Product newProduct = null;
         ProductId newProductId = new ProductId(id);
 
         if (productDetails.getName() == null || productDetails.getType() == null || productDetails.getInventory() <= 0) {
             throw new InvalidProductFieldException("Invalid product field");
         } else {
-            newProduct = new Product(productDetails.getName(), productDetails.getType(), productDetails.getInventory(), productDetails.getCost(), newProductId.getId());
+            newProduct = new Product(productDetails.getName(), productDetails.getType().name(), productDetails.getInventory(), productDetails.getCost(), newProductId.getId());
         }
         products.put(id, newProduct);
         return newProductId;
@@ -40,14 +41,18 @@ public class ProductService {
                     filteredProducts.add(product);
                 }
             }
-        } else if (!type.matches("^(?!true$|false$|\\d+$)[a-zA-Z]+$")) {
+        } else if (!type.matches("^[a-zA-Z]+$")) {
             throw new InvalidProductFieldException("Invalid query param");
         } else {
-            ProductType productType = ProductType.valueOf(type.toLowerCase());
-            for (Product product : products.values()) {
-                if (product.getType().equals(productType) && product.getCost() != null) {
-                    filteredProducts.add(product);
+            try {
+                ProductType productType = ProductType.valueOf(type.toLowerCase());
+                for (Product product : products.values()) {
+                    if (product.getType().equals(productType) && product.getCost() != null) {
+                        filteredProducts.add(product);
+                    }
                 }
+            } catch (ConstraintViolationException | IllegalArgumentException e) {
+                throw new InvalidProductFieldException("Invalid product type");
             }
         }
         return filteredProducts;

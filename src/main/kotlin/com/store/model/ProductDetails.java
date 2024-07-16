@@ -31,13 +31,6 @@ public class ProductDetails {
         this.name = name;
     }
 
-    public ProductType getType() {
-        return type;
-    }
-
-    public void setType(ProductType type) {
-        this.type = type;
-    }
 
     public int getInventory() {
         return inventory;
@@ -58,7 +51,25 @@ public class ProductDetails {
         this.cost = cost;
     }
 
+    public ProductDetails(@NotNull String name, @NotNull String type, @NotNull int inventory, Double cost) {
+        this.name = name;
+        this.type = ProductType.valueOf(type);
+        this.inventory = inventory;
+        this.cost = cost;
+    }
+
+    public ProductType getType() {
+        return type;
+    }
+
     public ProductDetails() {
+    }
+
+    public void setType(String type) throws InvalidProductFieldException {
+        if (!type.matches("^[a-zA-Z]+$")) {
+            throw new InvalidProductFieldException("Invalid product type");
+        }
+        this.type = ProductType.valueOf(type);
     }
 
     public ProductDetails(@NotNull String name, @NotNull ProductType type, @NotNull int inventory, Double cost) {
